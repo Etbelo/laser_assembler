@@ -178,10 +178,20 @@ BaseAssembler<T>::BaseAssembler(const std::string& max_size_param_name) : privat
     ROS_WARN("Downsample set to [%u]. Note that this is an unreleased/unstable feature", downsample_factor_);
 
   // ***** Start Services *****
-  build_cloud_server_    = n_.advertiseService("build_cloud",    &BaseAssembler<T>::buildCloud,    this);
-  assemble_scans_server_ = n_.advertiseService("assemble_scans", &BaseAssembler<T>::assembleScans, this);
-  build_cloud_server2_    = n_.advertiseService("build_cloud2",    &BaseAssembler<T>::buildCloud2,    this);
-  assemble_scans_server2_ = n_.advertiseService("assemble_scans2", &BaseAssembler<T>::assembleScans2, this);
+  std::string suffix;
+  private_ns_.param("suffix", suffix, std::string(""));
+
+  const std::string separator = std::string(suffix.length() > 0 ? 1 : 0, '_');
+
+  const std::string service_cloud = std::string("build_cloud") + separator + suffix;
+  const std::string service_scan = std::string("assemble_scans") + separator + suffix;
+  const std::string service_cloud2 = std::string("build_cloud2") + separator + suffix;
+  const std::string service_scan2 = std::string("assemble_scans2") + separator + suffix;
+
+  build_cloud_server_    = n_.advertiseService(service_cloud.c_str(),    &BaseAssembler<T>::buildCloud,    this);
+  assemble_scans_server_ = n_.advertiseService(service_scan.c_str(), &BaseAssembler<T>::assembleScans, this);
+  build_cloud_server2_    = n_.advertiseService(service_cloud2.c_str(),    &BaseAssembler<T>::buildCloud2,    this);
+  assemble_scans_server2_ = n_.advertiseService(service_scan2.c_str(), &BaseAssembler<T>::assembleScans2, this);
 
   // ***** Start Listening to Data *****
   // (Well, don't start listening just yet. Keep this as null until we actually start listening, when start() is called)
